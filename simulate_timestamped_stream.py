@@ -21,8 +21,8 @@ while not socket_bound and n_tries < MAX_PORT_TRIES:
         server_socket.bind((HOST, PORT))
         socket_bound = True
     except OSError as e:
-        print(f'Oops, this address is probably already in use, trying port {PORT}')
         PORT += 1
+        print(f'Oops, this address is probably already in use, trying port {PORT}')
     n_tries += 1
 
 # Listen for incoming connections
