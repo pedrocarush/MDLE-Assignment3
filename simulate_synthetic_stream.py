@@ -1,9 +1,9 @@
 import socket
-import csv
-from sys import stdin
-from datetime import datetime
+import random
 from time import sleep
+from typing import Generator
 
+MAX_SLEEP_TIME = 2
 MAX_PORT_TRIES = 5
 
 # Define the host and port
@@ -33,17 +33,18 @@ print('Server is listening on {}:{}'.format(HOST, PORT))
 client_socket, client_address = server_socket.accept()
 print('Accepted connection from {}:{}'.format(client_address[0], client_address[1]))
 
+# Use whatever multiplier and modulus values, we don't care about the distribution of the bits
+def bit_generator(seed: int = 0, multiplier: int = 1234567890, bias: int = 75320,modulus: int = 987654321) -> Generator[int, None, None]:
+    while True:
+        yield seed & 1
+        seed = (seed * multiplier + bias) % modulus
+
 try:
     # Send data to client
     prev_time = None
-    for row in csv.DictReader(stdin, delimiter=','):
-        current_time = datetime.fromisoformat(row['timestamp'])
-        
-        if prev_time is not None:
-            sleep((current_time - prev_time).total_seconds())
-        prev_time = current_time
-
-        client_socket.send((row['event'] + "\n").encode("utf-8"))
+    for bit in bit_generator():
+        client_socket.send((str(bit) + "\n").encode("utf-8"))
+        sleep(random.random() * MAX_SLEEP_TIME)
         
 except KeyboardInterrupt:
     print('Quitting!')

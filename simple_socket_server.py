@@ -1,5 +1,4 @@
 import socket
-import time
 
 
 # Define the host and port
