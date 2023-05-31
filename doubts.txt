@@ -1,0 +1,6 @@
+- Send the timestamp as well?
+- How do we make a window in terms of the number of records, instead of the event time?
+- What happens if we change the watermark of a query? For how long does Spark keep records?
+- We have to partition the window in order to assign the timestamp modulo N, but partition by what??
+- How will DGIM work in Spark??? How do we take the current row and modify the previous groups?????
+- Exercise 2.2 is with itemsets or just items?

@@ -2,6 +2,7 @@ import socket
 import random
 from time import sleep
 from typing import Generator
+from datetime import datetime
 
 MAX_SLEEP_TIME = 2
 MAX_PORT_TRIES = 5
@@ -47,7 +48,7 @@ try:
     # Send data to client
     prev_time = None
     for bit in bit_generator():
-        client_socket.send((str(bit) + "\n").encode("utf-8"))
+        client_socket.send((f"{datetime.now()},{bit}\n").encode("utf-8"))
         sleep(random.random() * MAX_SLEEP_TIME)
         s += bit
         
