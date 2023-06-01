@@ -38,7 +38,7 @@ client_socket, client_address = server_socket.accept()
 print('Accepted connection from {}:{}'.format(client_address[0], client_address[1]))
 
 # Use whatever multiplier and modulus values, we don't care about the distribution of the bits
-def bit_generator(seed: int = 0, multiplier: int = 1234567890, bias: int = 75320,modulus: int = 987654321) -> Generator[int, None, None]:
+def bit_generator(seed: int = 0, multiplier: int = 1234567890, bias: int = 75320, modulus: int = 987654321) -> Generator[int, None, None]:
     for _ in range(MAX_BITS):
         yield seed & 1
         seed = (seed * multiplier + bias) % modulus
@@ -48,7 +48,7 @@ try:
     # Send data to client
     prev_time = None
     for bit in bit_generator():
-        client_socket.send((f"{datetime.now()},{bit}\n").encode("utf-8"))
+        client_socket.send((str(bit) + "\n").encode("utf-8"))
         sleep(random.random() * MAX_SLEEP_TIME)
         s += bit
         
