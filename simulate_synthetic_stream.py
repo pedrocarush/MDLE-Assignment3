@@ -3,10 +3,12 @@ import random
 from time import sleep
 from typing import Generator
 from datetime import datetime
+from itertools import count
 
 MAX_SLEEP_TIME = 2
 MAX_PORT_TRIES = 5
 MAX_BITS = 10000
+MAX_TIMESTAMP_N = 2**32 - 1
 
 random.seed(0)
 
@@ -47,8 +49,8 @@ s = 0
 try:
     # Send data to client
     prev_time = None
-    for bit in bit_generator():
-        client_socket.send((str(bit) + "\n").encode("utf-8"))
+    for bit, timestamp_n in zip(bit_generator(), count()):
+        client_socket.send((f"{bit},{timestamp_n % MAX_TIMESTAMP_N},{datetime.now()}\n").encode("utf-8"))
         sleep(random.random() * MAX_SLEEP_TIME)
         s += bit
         
