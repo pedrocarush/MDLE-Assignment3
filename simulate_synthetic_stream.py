@@ -50,7 +50,7 @@ try:
     # Send data to client
     prev_time = None
     for bit, timestamp_n in zip(bit_generator(), count()):
-        client_socket.send((f"{bit},{timestamp_n % MAX_TIMESTAMP_N},{datetime.now()}\n").encode("utf-8"))
+        client_socket.send((f"{bit},{datetime.now()}\n").encode("utf-8"))
         sleep(random.random() * MAX_SLEEP_TIME)
         s += bit
         
