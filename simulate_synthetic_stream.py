@@ -1,5 +1,6 @@
 import socket
 import random
+import matplotlib.pyplot as plt
 from time import sleep
 from typing import Generator
 from datetime import datetime
@@ -8,7 +9,7 @@ from itertools import count
 MAX_SLEEP_TIME = 2
 MAX_PORT_TRIES = 5
 MAX_BITS = 10000
-MAX_TIMESTAMP_N = 2**32 - 1
+HISTORY_SIZE = 1000
 
 random.seed(0)
 
@@ -46,16 +47,28 @@ def bit_generator(seed: int = 0, multiplier: int = 1234567890, bias: int = 75320
         seed = (seed * multiplier + bias) % modulus
 
 s = 0
+timestamps = []
+historic_bits = []
+sums = []
 try:
     # Send data to client
     prev_time = None
     for bit, timestamp_n in zip(bit_generator(), count()):
-        client_socket.send((f"{bit},{datetime.now()}\n").encode("utf-8"))
+        timestamp = datetime.now()
+        client_socket.send((f"{bit},{timestamp}\n").encode("utf-8"))
         sleep(random.random() * MAX_SLEEP_TIME)
         s += bit
+        historic_bits.append(bit)
+        if len(historic_bits) > HISTORY_SIZE:
+            historic_bits.pop(0)
+        timestamps.append(timestamp)
+        sums.append(sum(historic_bits))
         
 except KeyboardInterrupt:
     print('Quitting!')
+
+except BrokenPipeError:
+    print('Connection lost!')
 
 except RuntimeError as e:
     print('Oops, something went wrong!')
@@ -63,6 +76,10 @@ except RuntimeError as e:
 
 finally:
     print('Total 1s:', s)
+
+    plt.plot(timestamps, sums)
+    plt.savefig('results/dgim_actual_ones.png')
+
     # Close the connection
     client_socket.close()
     server_socket.close()
