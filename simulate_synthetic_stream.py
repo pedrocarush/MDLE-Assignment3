@@ -6,6 +6,8 @@ from typing import Generator
 from datetime import datetime
 from itertools import count
 
+from plot_common import plot_ones_over_time
+
 MAX_SLEEP_TIME = 2
 MAX_PORT_TRIES = 5
 MAX_BITS = 10000
@@ -76,9 +78,7 @@ except RuntimeError as e:
 
 finally:
     print('Total 1s:', s)
-
-    plt.plot(timestamps, sums)
-    plt.savefig('results/dgim_actual_ones.png')
+    plot_ones_over_time(list(zip(timestamps, sums)), title_suffix=' (actual)', save_no_show=True)
 
     # Close the connection
     client_socket.close()

@@ -1,10 +1,15 @@
+from collections import defaultdict
 import socket
 import csv
 from sys import stdin
 from datetime import datetime
 from time import sleep
 
+from plot_common import plot_top_5_over_time
+
 MAX_PORT_TRIES = 5
+TOP_N_ITEMS = 5
+SAMPLE_TOP_EVERY_N_SECONDS = 5
 
 # Define the host and port
 HOST = 'localhost'
@@ -33,26 +38,40 @@ print('Server is listening on {}:{}'.format(HOST, PORT))
 client_socket, client_address = server_socket.accept()
 print('Accepted connection from {}:{}'.format(client_address[0], client_address[1]))
 
+counts_over_time = defaultdict(lambda: 0)
+most_frequent_at_time = {}
 try:
     # Send data to client
     prev_time = None
+    prev_sample_time = datetime.now()
     for row in csv.DictReader(stdin, delimiter=','):
         current_time = datetime.fromisoformat(row['timestamp'])
         
         if prev_time is not None:
             sleep((current_time - prev_time).total_seconds())
+            if (datetime.now() - prev_sample_time).total_seconds() > SAMPLE_TOP_EVERY_N_SECONDS:
+                most_frequent_at_time[current_time] = sorted(counts_over_time.items(), key=lambda t: t[1], reverse=True)[:TOP_N_ITEMS]
+                prev_sample_time = datetime.now()
         prev_time = current_time
 
-        client_socket.send((row['event'] + "\n").encode("utf-8"))
+        item = row['event']
+        client_socket.send((f"{item},{current_time}\n").encode("utf-8"))
+        counts_over_time[item] += 1
         
 except KeyboardInterrupt:
     print('Quitting!')
+
+except BrokenPipeError:
+    print('Connection lost!')
 
 except RuntimeError as e:
     print('Oops, something went wrong!')
     print(e)
 
 finally:
+
+    plot_top_5_over_time(most_frequent_at_time.items(), title_suffix=' (actual)', save_no_show=True)
+
     # Close the connection
     client_socket.close()
     server_socket.close()
