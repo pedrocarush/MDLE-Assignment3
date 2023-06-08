@@ -49,14 +49,15 @@ try:
         
         if prev_time is not None:
             sleep((current_time - prev_time).total_seconds())
-            if (datetime.now() - prev_sample_time).total_seconds() > SAMPLE_TOP_EVERY_N_SECONDS:
-                most_frequent_at_time[current_time] = sorted(counts_over_time.items(), key=lambda t: t[1], reverse=True)[:TOP_N_ITEMS]
-                prev_sample_time = datetime.now()
         prev_time = current_time
 
         item = row['event']
         client_socket.send((f"{item},{current_time}\n").encode("utf-8"))
         counts_over_time[item] += 1
+
+        if (datetime.now() - prev_sample_time).total_seconds() > SAMPLE_TOP_EVERY_N_SECONDS:
+            most_frequent_at_time[current_time] = [t[0] for t in sorted(counts_over_time.items(), key=lambda t: t[1], reverse=True)[:TOP_N_ITEMS]]
+            prev_sample_time = datetime.now()
         
 except KeyboardInterrupt:
     print('Quitting!')

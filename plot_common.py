@@ -46,6 +46,7 @@ def plot_top_5_over_time(top_5_at_each_timestamp: List[Tuple[datetime, List[str]
     plt.ylabel('Rank (top place)')
     plt.legend(bbox_to_anchor=(1.04, 1), borderaxespad=0)
     
+    plt.tight_layout()
     if save_no_show:
         plt.savefig('results/edw_top.png')
     else:
