@@ -83,7 +83,7 @@ def dgim_update(key: tuple, pdfs: Iterator[pd.DataFrame], state: GroupState, N: 
     yield pd.DataFrame(new_buckets_merged, columns=['bucket_size', 'end_timestamp'])
 
 
-def edw_update(key: tuple, pdfs: Iterator[pd.DataFrame], state: GroupState, c: float, score_threshold: float) -> Iterator[pd.DataFrame]:
+def edw_update(key: tuple, pdfs: Iterator[pd.DataFrame], state: GroupState, c: float, threshold: float) -> Iterator[pd.DataFrame]:
     
     # Initialize the state and get the old counts state
     if not state.exists:
@@ -101,7 +101,7 @@ def edw_update(key: tuple, pdfs: Iterator[pd.DataFrame], state: GroupState, c: f
 
     # Update old counts (make them older)
     old_decay = ((1 - c)**time_elaped)
-    counts = {item: count * old_decay for item, count in counts.items() if count * old_decay >= score_threshold}
+    counts = {item: count * old_decay for item, count in counts.items() if count * old_decay >= threshold}
 
     # Add new counts
     for item, group in pdf_aggregate.groupby(by='item'):
@@ -176,7 +176,7 @@ def dgim(
     # Keep processing until manual interruption
     while True:
         count_1s = (spark.sql('SELECT * FROM outputterMem')
-            .sort('processing_timestamp')
+            .sort('processing_timestamp', ascending=True)
             .withColumn('dummy_key', F.lit(1))
             .groupby('dummy_key')
             .agg(F.explode(F.last('computed_buckets')).alias('computed_buckets_exploded'))
@@ -252,7 +252,7 @@ def edw(
     # Keep processing until manual interruption.
     while True:
         top_5 = (spark.sql('SELECT * FROM outputterMem')
-            .sort('processing_timestamp')
+            .sort('processing_timestamp', ascending=True)
             .withColumn('dummy_key', F.lit(1))
             .groupby('dummy_key')
             .agg(F.explode(F.last('computed_counts')).alias('computed_counts_exploded'))
@@ -280,7 +280,7 @@ The documentation is present in the notebook.
 When submitting the script, the streams should be running on the background with a socket connection:
 - for the DGIM algorithm, the script 'simulate_synthetic_stream.py' should be running;
 - for the EDW algorithm, the script 'simulate_timestamped_stream.py' should be running, with the uncompressed data from 'stream_data.csv' fed into this script's standard input.
-  Example: gunzip -dc data/stream_data.csv.gz | python3 simulate_timestamped_stream.py
+  Example: gunzip -dc data/stream-data.csv.gz | python3 simulate_timestamped_stream.py
 The streams will be processed until a KeyboardInterrupt command is issued to the submitted script."""
     )
     parser.add_argument("algorithm", choices=["DGIM", "EDW"], help="the streaming algorithm to execute")
