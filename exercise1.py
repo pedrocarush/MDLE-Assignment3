@@ -1,22 +1,19 @@
-import os.path as path
-import pandas as pd
 import gzip
-import numpy as np
-import networkx as nx
-import matplotlib.pyplot as plt
+import os.path as path
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-
 from io import SEEK_CUR
 from typing import List
-from scipy.sparse.linalg import eigs
 
-from sklearn.cluster import KMeans
-
-from sklearn.cluster import SpectralClustering
-
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+import pandas as pd
+import pyspark.sql.functions as F
 from pyspark.ml.clustering import PowerIterationClustering
 from pyspark.sql import SparkSession
-import pyspark.sql.functions as F
+from scipy.sparse.linalg import eigs
+from sklearn.cluster import KMeans, SpectralClustering
+
 
 def plot_clustering(graph: nx.Graph, clustering_labels: List[int], implementation: str, chosen_dataset: str):
     nx.draw(graph, node_color=clustering_labels, node_size=10, width = 0.1, cmap=plt.cm.jet)
