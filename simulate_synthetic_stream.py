@@ -78,6 +78,7 @@ except RuntimeError as e:
 
 finally:
     print('Total 1s:', s)
+    print(f'Total 1s in the last {HISTORY_SIZE} bits:', sum(historic_bits))
     plot_ones_over_time(list(zip(timestamps, sums)), title_suffix=' (actual)', save_no_show=True)
 
     # Close the connection
